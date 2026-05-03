@@ -1,0 +1,177 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id              Int              @id @default(autoincrement())
+  phone           String           @unique
+  password        String
+  name            String?
+  role            String           @default("worker")
+  balance         Int              @default(0)
+  rating          Float            @default(5.0)
+  totalRatings    Int              @default(0)
+  totalJobs       Int              @default(0)
+  totalEarned     Int              @default(0)
+  totalSpent      Int              @default(0)
+  coins           Int              @default(0)
+  region          String?
+  district        String?
+  skills          String?
+  cats            String?
+  experience      Int?
+  isDeleted       Boolean          @default(false)
+  deletedAt       DateTime?
+  isBlocked       Boolean          @default(false)
+  blockReason     String?
+  blockedUntil    DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  logs            ActionLog[]
+  chats           ChatUser[]
+  acceptedJobs    Job[]            @relation("WorkerJobs")
+  postedJobs      Job[]            @relation("ClientJobs")
+  applicants      JobApplicant[]
+  messages        Message[]
+  paymentRequests PaymentRequest[] @relation("UserPayments")
+  transactions    Transaction[]
+}
+
+model Job {
+  id            Int            @id @default(autoincrement())
+  title         String
+  cat           String
+  icon          String?
+  price         Int
+  addr          String
+  phone         String
+  date          String
+  dist          String?
+  desc          String?
+  clientId      Int
+  workerId      Int?
+  status        String         @default("open")
+  clientRating  Float?
+  clientReviews Int?
+  lat           Float?
+  lng           Float?
+  isDeleted     Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  dueDate       DateTime?
+  requiredWorkers Int          @default(1)
+  logs          ActionLog[]    @relation("JobLogs")
+  chats         Chat[]
+  worker        User?          @relation("WorkerJobs", fields: [workerId], references: [id])
+  client        User           @relation("ClientJobs", fields: [clientId], references: [id])
+  applicants    JobApplicant[]
+}
+
+model JobApplicant {
+  id        Int      @id @default(autoincrement())
+  jobId     Int
+  workerId  Int
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
+  worker    User     @relation(fields: [workerId], references: [id])
+  job       Job      @relation(fields: [jobId], references: [id])
+
+  @@unique([jobId, workerId])
+}
+
+model Chat {
+  id        String     @id @default(uuid())
+  jobId     Int?
+  isSupport Boolean    @default(false)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  job       Job?       @relation(fields: [jobId], references: [id])
+  users     ChatUser[]
+  messages  Message[]
+}
+
+model ChatUser {
+  id        Int      @id @default(autoincrement())
+  chatId    String
+  userId    Int
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  chat      Chat     @relation(fields: [chatId], references: [id])
+
+  @@unique([chatId, userId])
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  text      String
+  senderId  Int
+  chatId    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [senderId], references: [id])
+  chat      Chat     @relation(fields: [chatId], references: [id])
+}
+
+model Transaction {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  amount    Int
+  type      String
+  createdAt DateTime @default(now())
+  desc      String?
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model ActionLog {
+  id         Int      @id @default(autoincrement())
+  userId     Int?
+  targetId   String?
+  targetType String?
+  action     String
+  details    String?
+  createdAt  DateTime @default(now())
+  jobId      Int?
+  job        Job?     @relation("JobLogs", fields: [jobId], references: [id])
+  user       User?    @relation(fields: [userId], references: [id])
+}
+
+model PaymentRequest {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  amount    Int
+  status    String   @default("pending")
+  checkImg  String?
+  note      String?
+  createdAt DateTime @default(now())
+  user      User     @relation("UserPayments", fields: [userId], references: [id])
+}
+
+model Category {
+  id          String   @id
+  name        String
+  icon        String
+  status       String   @default("pending")
+  suggestedBy  String?
+  proposedName String?
+  proposedIcon String?
+  createdAt   DateTime @default(now())
+}
+
+model Settings {
+  id         Int      @id @default(autoincrement())
+  cardNum    String   @default("8600 1234 5678 9012")
+  cardHolder String   @default("TezUsta MCHJ")
+  commission Int      @default(30000)
+  updatedAt  DateTime @updatedAt
+}
+
+model WheelSetting {
+  id          Int      @id @default(1)
+  spinCost    Int      @default(50)
+  prizesJson  String   // JSON string of prizes [{label, amount, chance}]
+  updatedAt   DateTime @updatedAt
+}
