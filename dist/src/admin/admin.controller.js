@@ -24,14 +24,14 @@ let AdminController = class AdminController {
     constructor(adminService) {
         this.adminService = adminService;
     }
-    getLogs(page) {
-        return this.adminService.getAllLogs(+page || 1);
+    getLogs(page, q) {
+        return this.adminService.getAllLogs(+page || 1, 8, q);
     }
-    getUsers(req, page) {
-        return this.adminService.getAllUsers(req.user.role, +page || 1);
+    getUsers(req, page, q, region, district) {
+        return this.adminService.getAllUsers(req.user.role, +page || 1, 8, q, region, district);
     }
-    getJobs(page) {
-        return this.adminService.getAllJobs(+page || 1);
+    getJobs(page, q, region, district) {
+        return this.adminService.getAllJobs(+page || 1, 8, q, region, district);
     }
     getUserJobs(id, page) {
         return this.adminService.getUserJobs(+id, +page || 1);
@@ -51,8 +51,8 @@ let AdminController = class AdminController {
     deleteUser(id) {
         return this.adminService.deleteUser(+id);
     }
-    getPayments(page) {
-        return this.adminService.getPaymentRequests(+page || 1);
+    getPayments(page, q) {
+        return this.adminService.getPaymentRequests(+page || 1, 8, q);
     }
     approvePayment(id) {
         return this.adminService.approvePayment(+id);
@@ -60,8 +60,8 @@ let AdminController = class AdminController {
     rejectPayment(id) {
         return this.adminService.rejectPayment(+id);
     }
-    getCategories() {
-        return this.adminService.getCategories();
+    getCategories(q) {
+        return this.adminService.getCategories(q);
     }
     createCategory(body, req) {
         const status = req.user.role === 'superadmin' ? 'active' : 'pending';
@@ -76,8 +76,8 @@ let AdminController = class AdminController {
     approveCategory(id) {
         return this.adminService.approveCategory(id);
     }
-    getTransactions(page) {
-        return this.adminService.getAllTransactions(+page || 1);
+    getTransactions(page, q) {
+        return this.adminService.getAllTransactions(+page || 1, 8, q);
     }
     getSettings() {
         return this.adminService.getSettings();
@@ -100,8 +100,9 @@ __decorate([
     (0, common_1.Get)('logs'),
     (0, swagger_1.ApiOperation)({ summary: 'Get all action logs' }),
     __param(0, (0, common_1.Query)('page')),
+    __param(1, (0, common_1.Query)('q')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
 ], AdminController.prototype, "getLogs", null);
 __decorate([
@@ -109,16 +110,22 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Get all users' }),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Query)('page')),
+    __param(2, (0, common_1.Query)('q')),
+    __param(3, (0, common_1.Query)('region')),
+    __param(4, (0, common_1.Query)('district')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:paramtypes", [Object, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], AdminController.prototype, "getUsers", null);
 __decorate([
     (0, common_1.Get)('jobs'),
     (0, swagger_1.ApiOperation)({ summary: 'Get all jobs' }),
     __param(0, (0, common_1.Query)('page')),
+    __param(1, (0, common_1.Query)('q')),
+    __param(2, (0, common_1.Query)('region')),
+    __param(3, (0, common_1.Query)('district')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], AdminController.prototype, "getJobs", null);
 __decorate([
@@ -176,8 +183,9 @@ __decorate([
     (0, common_1.Get)('payments'),
     (0, swagger_1.ApiOperation)({ summary: 'Get all payment requests' }),
     __param(0, (0, common_1.Query)('page')),
+    __param(1, (0, common_1.Query)('q')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
 ], AdminController.prototype, "getPayments", null);
 __decorate([
@@ -200,8 +208,9 @@ __decorate([
     (0, roles_decorator_1.Roles)('admin', 'superadmin', 'worker', 'client'),
     (0, common_1.Get)('categories'),
     (0, swagger_1.ApiOperation)({ summary: 'Get all categories' }),
+    __param(0, (0, common_1.Query)('q')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], AdminController.prototype, "getCategories", null);
 __decorate([
@@ -243,8 +252,9 @@ __decorate([
     (0, common_1.Get)('transactions'),
     (0, swagger_1.ApiOperation)({ summary: 'Get all transactions' }),
     __param(0, (0, common_1.Query)('page')),
+    __param(1, (0, common_1.Query)('q')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
 ], AdminController.prototype, "getTransactions", null);
 __decorate([

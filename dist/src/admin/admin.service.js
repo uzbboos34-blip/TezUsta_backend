@@ -17,9 +17,19 @@ let AdminService = class AdminService {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    async getAllLogs(page = 1, limit = 8) {
+    async getAllLogs(page = 1, limit = 8, q) {
+        const where = {};
+        if (q) {
+            where.OR = [
+                { user: { name: { contains: q, mode: 'insensitive' } } },
+                { user: { phone: { contains: q, mode: 'insensitive' } } },
+                { action: { contains: q, mode: 'insensitive' } },
+                { details: { contains: q, mode: 'insensitive' } },
+            ];
+        }
         const [data, total] = await Promise.all([
             this.prisma.actionLog.findMany({
+                where,
                 include: {
                     user: { select: { name: true, phone: true, role: true } },
                     job: true,
@@ -28,7 +38,7 @@ let AdminService = class AdminService {
                 skip: (page - 1) * limit,
                 take: limit,
             }),
-            this.prisma.actionLog.count()
+            this.prisma.actionLog.count({ where })
         ]);
         return {
             data: data.map((l) => ({
@@ -38,11 +48,29 @@ let AdminService = class AdminService {
             total
         };
     }
-    async getAllUsers(viewerRole, page = 1, limit = 8) {
-        const where = viewerRole === 'superadmin' ? {} : { role: { notIn: ['admin', 'superadmin'] } };
+    async getAllUsers(viewerRole, page = 1, limit = 8, q, region, district) {
+        const whereRole = viewerRole === 'superadmin' ? {} : { role: { notIn: ['admin', 'superadmin'] } };
+        const and = [];
+        if (whereRole.role)
+            and.push({ role: whereRole.role });
+        if (q) {
+            and.push({
+                OR: [
+                    { name: { contains: q, mode: 'insensitive' } },
+                    { phone: { contains: q, mode: 'insensitive' } },
+                    { region: { contains: q, mode: 'insensitive' } },
+                    { district: { contains: q, mode: 'insensitive' } },
+                ]
+            });
+        }
+        if (region)
+            and.push({ region });
+        if (district)
+            and.push({ district });
+        const finalWhere = and.length > 0 ? { AND: and } : whereRole;
         const [users, total] = await Promise.all([
             this.prisma.user.findMany({
-                where,
+                where: finalWhere,
                 include: {
                     _count: { select: { postedJobs: true, acceptedJobs: true } },
                     acceptedJobs: {
@@ -58,7 +86,7 @@ let AdminService = class AdminService {
                 skip: (page - 1) * limit,
                 take: limit,
             }),
-            this.prisma.user.count({ where })
+            this.prisma.user.count({ where: finalWhere })
         ]);
         return {
             data: users.map((u) => {
@@ -78,10 +106,17 @@ let AdminService = class AdminService {
             total
         };
     }
-    async getCategories() {
+    async getCategories(q) {
+        const where = { NOT: { status: 'deleted' } };
+        if (q) {
+            where.OR = [
+                { name: { contains: q, mode: 'insensitive' } },
+                { proposedName: { contains: q, mode: 'insensitive' } },
+            ];
+        }
         const [cats, workers, jobs] = await Promise.all([
             this.prisma.category.findMany({
-                where: { NOT: { status: 'deleted' } },
+                where,
                 orderBy: { createdAt: 'desc' }
             }),
             this.prisma.user.findMany({ where: { role: 'worker', isDeleted: false }, select: { skills: true } }),
@@ -166,18 +201,38 @@ let AdminService = class AdminService {
             data: { status: 'active' }
         });
     }
-    async getAllJobs(page = 1, limit = 8) {
+    async getAllJobs(page = 1, limit = 8, q, region, district) {
+        const and = [{ isDeleted: false }];
+        if (q) {
+            and.push({
+                OR: [
+                    { title: { contains: q, mode: 'insensitive' } },
+                    { desc: { contains: q, mode: 'insensitive' } },
+                    { addr: { contains: q, mode: 'insensitive' } },
+                    { client: { name: { contains: q, mode: 'insensitive' } } },
+                    { client: { phone: { contains: q, mode: 'insensitive' } } },
+                    { client: { region: { contains: q, mode: 'insensitive' } } },
+                    { client: { district: { contains: q, mode: 'insensitive' } } },
+                ]
+            });
+        }
+        if (region)
+            and.push({ client: { region } });
+        if (district)
+            and.push({ client: { district } });
+        const where = { AND: and };
         const [data, total] = await Promise.all([
             this.prisma.job.findMany({
+                where,
                 include: {
-                    client: { select: { name: true, phone: true } },
+                    client: { select: { name: true, phone: true, region: true, district: true } },
                     worker: { select: { name: true, phone: true } },
                 },
                 orderBy: { createdAt: 'desc' },
                 skip: (page - 1) * limit,
                 take: limit,
             }),
-            this.prisma.job.count()
+            this.prisma.job.count({ where })
         ]);
         return { data, total };
     }
@@ -197,15 +252,23 @@ let AdminService = class AdminService {
         ]);
         return { data, total };
     }
-    async getPaymentRequests(page = 1, limit = 8) {
+    async getPaymentRequests(page = 1, limit = 8, q) {
+        const where = {};
+        if (q) {
+            where.OR = [
+                { user: { name: { contains: q, mode: 'insensitive' } } },
+                { user: { phone: { contains: q, mode: 'insensitive' } } },
+            ];
+        }
         const [data, total] = await Promise.all([
             this.prisma.paymentRequest.findMany({
+                where,
                 include: { user: { select: { name: true, phone: true } } },
                 orderBy: { createdAt: 'desc' },
                 skip: (page - 1) * limit,
                 take: limit,
             }),
-            this.prisma.paymentRequest.count()
+            this.prisma.paymentRequest.count({ where })
         ]);
         return { data, total };
     }
@@ -236,9 +299,18 @@ let AdminService = class AdminService {
             data: { status: 'rejected' },
         });
     }
-    async getAllTransactions(page = 1, limit = 8) {
+    async getAllTransactions(page = 1, limit = 8, q) {
+        const where = {};
+        if (q) {
+            where.OR = [
+                { user: { name: { contains: q, mode: 'insensitive' } } },
+                { user: { phone: { contains: q, mode: 'insensitive' } } },
+                { desc: { contains: q, mode: 'insensitive' } },
+            ];
+        }
         const [data, total] = await Promise.all([
             this.prisma.transaction.findMany({
+                where,
                 include: {
                     user: { select: { name: true, phone: true, role: true } },
                 },
@@ -246,7 +318,7 @@ let AdminService = class AdminService {
                 skip: (page - 1) * limit,
                 take: limit,
             }),
-            this.prisma.transaction.count()
+            this.prisma.transaction.count({ where })
         ]);
         return { data, total };
     }

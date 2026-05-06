@@ -21,7 +21,9 @@ export class JobsService {
   ) { }
 
   async create(clientId: number, dto: CreateJobDto) {
-    const client = await this.prisma.user.findUnique({
+    console.log('Creating job for client:', clientId, 'with data:', JSON.stringify(dto, null, 2));
+    try {
+      const client = await this.prisma.user.findUnique({
       where: { id: clientId },
     });
 
@@ -39,6 +41,8 @@ export class JobsService {
         addr: dto.addr,
         phone: dto.phone,
         date: dto.date,
+        region: dto.region,
+        dist: dto.dist,
         desc: dto.desc || '—',
         lat: dto.lat,
         lng: dto.lng,
@@ -59,14 +63,24 @@ export class JobsService {
     });
 
     return job;
+    } catch (error) {
+      console.error('Error creating job:', error);
+      throw error;
+    }
   }
 
   async findAll(
     userId: number,
     role: string,
-    filterCat?: string,
-    myPosted: boolean = false,
+    options: {
+      cat?: string;
+      mine?: boolean;
+      q?: string;
+      region?: string;
+      district?: string;
+    },
   ) {
+    const { cat, mine, q, region, district } = options;
     const userSelect = {
       select: {
         id: true,
@@ -80,9 +94,18 @@ export class JobsService {
       },
     };
 
-    if (role === 'client' || myPosted) {
+    if (role === 'client' || mine) {
+      const where: any = { clientId: userId, isDeleted: false };
+      if (q) {
+        where.OR = [
+          { title: { contains: q, mode: 'insensitive' } },
+          { desc: { contains: q, mode: 'insensitive' } },
+          { addr: { contains: q, mode: 'insensitive' } },
+        ];
+      }
+      
       const jobs = await (this.prisma as any).job.findMany({
-        where: { clientId: userId, isDeleted: false },
+        where,
         include: {
           applicants: true,
           worker: userSelect,
@@ -96,30 +119,53 @@ export class JobsService {
     }
 
     // For worker searching for new jobs
-    const where: any = {
-      status: 'open',
-      isDeleted: false,
-      applicants: {
-        none: { workerId: userId }
-      }
-    };
-    if (filterCat && filterCat !== 'all') {
-      where.cat = filterCat;
+    const and: any[] = [
+      { status: 'open' },
+      { isDeleted: false },
+      { applicants: { none: { workerId: userId } } }
+    ];
+
+    if (cat && cat !== 'all') {
+      and.push({ cat });
     }
 
-    const jobs = await (this.prisma as any).job.findMany({
-      where,
-      include: {
-        client: userSelect,
-        applicants: { select: { id: true } }
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+    if (q) {
+      and.push({
+        OR: [
+          { title: { contains: q, mode: 'insensitive' } },
+          { desc: { contains: q, mode: 'insensitive' } },
+          { addr: { contains: q, mode: 'insensitive' } },
+        ]
+      });
+    }
 
-    return jobs.map((j: any) => ({
-      ...j,
-      acceptedWorkersCount: j.applicants?.length || 0,
-    }));
+    try {
+      if (region) {
+        and.push({ region: region });
+      }
+      if (district) {
+        and.push({ dist: district });
+      }
+
+      console.log('Worker job search where:', JSON.stringify({ AND: and }, null, 2));
+
+      const jobs = await this.prisma.job.findMany({
+        where: { AND: and },
+        include: {
+          client: userSelect,
+          applicants: { select: { id: true } }
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+      return jobs.map((j: any) => ({
+        ...j,
+        acceptedWorkersCount: j.applicants?.length || 0,
+      }));
+    } catch (err) {
+      console.error('Job findMany error:', err);
+      // Fallback to empty list instead of crashing
+      return [];
+    }
   }
 
   async findOne(id: number, userId: number, role: string) {

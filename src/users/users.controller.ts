@@ -8,6 +8,7 @@ import {
   Post,
   Param,
   UseGuards,
+  Header,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -87,6 +88,7 @@ export class UsersController {
   }
 
   @Get('categories')
+  @Header('Cache-Control', 'public, max-age=300')
   @ApiOperation({ summary: 'Get all categories' })
   getCategories() {
     return this.usersService.getCategories();

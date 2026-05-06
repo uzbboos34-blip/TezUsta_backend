@@ -83,8 +83,9 @@ let AuthService = class AuthService {
             details: { role: dto.role },
         });
         const payload = { sub: user.id, role: user.role };
+        const expiresIn = (user.role === 'admin' || user.role === 'superadmin') ? '1h' : '7d';
         return {
-            access_token: await this.jwtService.signAsync(payload),
+            access_token: await this.jwtService.signAsync(payload, { expiresIn }),
             user: {
                 id: user.id,
                 name: user.name,
@@ -120,8 +121,9 @@ let AuthService = class AuthService {
             action: 'USER_LOGIN',
         });
         const payload = { sub: u.id, role: u.role };
+        const expiresIn = (u.role === 'admin' || u.role === 'superadmin') ? '1h' : '7d';
         return {
-            access_token: await this.jwtService.signAsync(payload),
+            access_token: await this.jwtService.signAsync(payload, { expiresIn }),
             user: {
                 id: u.id,
                 name: u.name,

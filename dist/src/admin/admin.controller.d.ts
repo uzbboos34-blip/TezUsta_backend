@@ -2,7 +2,7 @@ import { AdminService } from './admin.service';
 export declare class AdminController {
     private readonly adminService;
     constructor(adminService: AdminService);
-    getLogs(page: string): Promise<{
+    getLogs(page: string, q?: string): Promise<{
         data: {
             details: any;
             user: {
@@ -13,6 +13,7 @@ export declare class AdminController {
             job: {
                 id: number;
                 phone: string;
+                region: string | null;
                 isDeleted: boolean;
                 createdAt: Date;
                 updatedAt: Date;
@@ -44,7 +45,7 @@ export declare class AdminController {
         }[];
         total: number;
     }>;
-    getUsers(req: any, page: string): Promise<{
+    getUsers(req: any, page: string, q?: string, region?: string, district?: string): Promise<{
         data: {
             totalEarned: any;
             totalSpent: any;
@@ -92,7 +93,7 @@ export declare class AdminController {
         }[];
         total: number;
     }>;
-    getJobs(page: string): Promise<{
+    getJobs(page: string, q?: string, region?: string, district?: string): Promise<{
         data: ({
             worker: {
                 phone: string;
@@ -101,10 +102,13 @@ export declare class AdminController {
             client: {
                 phone: string;
                 name: string | null;
+                region: string | null;
+                district: string | null;
             };
         } & {
             id: number;
             phone: string;
+            region: string | null;
             isDeleted: boolean;
             createdAt: Date;
             updatedAt: Date;
@@ -165,13 +169,13 @@ export declare class AdminController {
     }>;
     restoreUser(id: string): Promise<any>;
     deleteUser(id: string): Promise<any>;
-    getPayments(page: string): Promise<{
+    getPayments(page: string, q?: string): Promise<{
         data: any;
         total: any;
     }>;
     approvePayment(id: string): Promise<any>;
     rejectPayment(id: string): Promise<any>;
-    getCategories(): Promise<any>;
+    getCategories(q?: string): Promise<any>;
     createCategory(body: {
         id: string;
         name: string;
@@ -183,7 +187,7 @@ export declare class AdminController {
     }): Promise<any>;
     deleteCategory(id: string): Promise<any>;
     approveCategory(id: string): Promise<any>;
-    getTransactions(page: string): Promise<{
+    getTransactions(page: string, q?: string): Promise<{
         data: any;
         total: any;
     }>;

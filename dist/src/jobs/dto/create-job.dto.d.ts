@@ -6,6 +6,7 @@ export declare class CreateJobDto {
     addr: string;
     phone: string;
     date: string;
+    region?: string;
     dist?: string;
     desc: string;
     lat?: number;

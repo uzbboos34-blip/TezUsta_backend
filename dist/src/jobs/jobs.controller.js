@@ -29,8 +29,14 @@ let JobsController = class JobsController {
     create(req, createJobDto) {
         return this.jobsService.create(req.user.id, createJobDto);
     }
-    findAll(req, filterCat, mine) {
-        return this.jobsService.findAll(req.user.id, req.user.role, filterCat, mine === 'true');
+    findAll(req, filterCat, mine, q, region, district) {
+        return this.jobsService.findAll(req.user.id, req.user.role, {
+            cat: filterCat,
+            mine: mine === 'true',
+            q,
+            region,
+            district,
+        });
     }
     findOne(req, id) {
         return this.jobsService.findOne(+id, req.user.id, req.user.role);
@@ -74,8 +80,11 @@ __decorate([
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)('cat')),
     __param(2, (0, common_1.Query)('mine')),
+    __param(3, (0, common_1.Query)('q')),
+    __param(4, (0, common_1.Query)('region')),
+    __param(5, (0, common_1.Query)('district')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String, String]),
+    __metadata("design:paramtypes", [Object, String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], JobsController.prototype, "findAll", null);
 __decorate([

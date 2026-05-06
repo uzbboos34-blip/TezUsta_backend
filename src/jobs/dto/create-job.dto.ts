@@ -37,7 +37,12 @@ export class CreateJobDto {
   @IsString()
   date: string;
 
-  @ApiProperty({ example: '2.4 km', required: false })
+  @ApiProperty({ example: 'toshkent_shahar', required: false })
+  @IsOptional()
+  @IsString()
+  region?: string;
+
+  @ApiProperty({ example: 'Chilonzor', required: false })
   @IsOptional()
   @IsString()
   dist?: string;

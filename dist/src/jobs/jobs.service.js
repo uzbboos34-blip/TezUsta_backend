@@ -22,42 +22,52 @@ let JobsService = class JobsService {
         this.logs = logs;
     }
     async create(clientId, dto) {
-        const client = await this.prisma.user.findUnique({
-            where: { id: clientId },
-        });
-        let dueDate = dto.dueDate ? new Date(dto.dueDate) : undefined;
-        if (!dueDate) {
-            dueDate = new Date();
-            dueDate.setHours(dueDate.getHours() + 24);
+        console.log('Creating job for client:', clientId, 'with data:', JSON.stringify(dto, null, 2));
+        try {
+            const client = await this.prisma.user.findUnique({
+                where: { id: clientId },
+            });
+            let dueDate = dto.dueDate ? new Date(dto.dueDate) : undefined;
+            if (!dueDate) {
+                dueDate = new Date();
+                dueDate.setHours(dueDate.getHours() + 24);
+            }
+            const job = await this.prisma.job.create({
+                data: {
+                    title: dto.title,
+                    cat: dto.cat,
+                    price: dto.price,
+                    addr: dto.addr,
+                    phone: dto.phone,
+                    date: dto.date,
+                    region: dto.region,
+                    dist: dto.dist,
+                    desc: dto.desc || '—',
+                    lat: dto.lat,
+                    lng: dto.lng,
+                    clientId,
+                    clientRating: client?.rating || 5.0,
+                    clientReviews: 0,
+                    status: 'open',
+                    requiredWorkers: dto.requiredWorkers || 1,
+                    dueDate,
+                },
+            });
+            await this.logs.create({
+                userId: clientId,
+                jobId: job.id,
+                action: 'JOB_CREATE',
+                details: dto,
+            });
+            return job;
         }
-        const job = await this.prisma.job.create({
-            data: {
-                title: dto.title,
-                cat: dto.cat,
-                price: dto.price,
-                addr: dto.addr,
-                phone: dto.phone,
-                date: dto.date,
-                desc: dto.desc || '—',
-                lat: dto.lat,
-                lng: dto.lng,
-                clientId,
-                clientRating: client?.rating || 5.0,
-                clientReviews: 0,
-                status: 'open',
-                requiredWorkers: dto.requiredWorkers || 1,
-                dueDate,
-            },
-        });
-        await this.logs.create({
-            userId: clientId,
-            jobId: job.id,
-            action: 'JOB_CREATE',
-            details: dto,
-        });
-        return job;
+        catch (error) {
+            console.error('Error creating job:', error);
+            throw error;
+        }
     }
-    async findAll(userId, role, filterCat, myPosted = false) {
+    async findAll(userId, role, options) {
+        const { cat, mine, q, region, district } = options;
         const userSelect = {
             select: {
                 id: true,
@@ -70,9 +80,17 @@ let JobsService = class JobsService {
                 district: true,
             },
         };
-        if (role === 'client' || myPosted) {
+        if (role === 'client' || mine) {
+            const where = { clientId: userId, isDeleted: false };
+            if (q) {
+                where.OR = [
+                    { title: { contains: q, mode: 'insensitive' } },
+                    { desc: { contains: q, mode: 'insensitive' } },
+                    { addr: { contains: q, mode: 'insensitive' } },
+                ];
+            }
             const jobs = await this.prisma.job.findMany({
-                where: { clientId: userId, isDeleted: false },
+                where,
                 include: {
                     applicants: true,
                     worker: userSelect,
@@ -84,28 +102,48 @@ let JobsService = class JobsService {
                 acceptedWorkersCount: j.applicants?.length || 0,
             }));
         }
-        const where = {
-            status: 'open',
-            isDeleted: false,
-            applicants: {
-                none: { workerId: userId }
-            }
-        };
-        if (filterCat && filterCat !== 'all') {
-            where.cat = filterCat;
+        const and = [
+            { status: 'open' },
+            { isDeleted: false },
+            { applicants: { none: { workerId: userId } } }
+        ];
+        if (cat && cat !== 'all') {
+            and.push({ cat });
         }
-        const jobs = await this.prisma.job.findMany({
-            where,
-            include: {
-                client: userSelect,
-                applicants: { select: { id: true } }
-            },
-            orderBy: { createdAt: 'desc' },
-        });
-        return jobs.map((j) => ({
-            ...j,
-            acceptedWorkersCount: j.applicants?.length || 0,
-        }));
+        if (q) {
+            and.push({
+                OR: [
+                    { title: { contains: q, mode: 'insensitive' } },
+                    { desc: { contains: q, mode: 'insensitive' } },
+                    { addr: { contains: q, mode: 'insensitive' } },
+                ]
+            });
+        }
+        try {
+            if (region) {
+                and.push({ region: region });
+            }
+            if (district) {
+                and.push({ dist: district });
+            }
+            console.log('Worker job search where:', JSON.stringify({ AND: and }, null, 2));
+            const jobs = await this.prisma.job.findMany({
+                where: { AND: and },
+                include: {
+                    client: userSelect,
+                    applicants: { select: { id: true } }
+                },
+                orderBy: { createdAt: 'desc' },
+            });
+            return jobs.map((j) => ({
+                ...j,
+                acceptedWorkersCount: j.applicants?.length || 0,
+            }));
+        }
+        catch (err) {
+            console.error('Job findMany error:', err);
+            return [];
+        }
     }
     async findOne(id, userId, role) {
         const job = await this.prisma.job.findFirst({

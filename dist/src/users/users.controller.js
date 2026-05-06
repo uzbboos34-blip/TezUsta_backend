@@ -140,6 +140,7 @@ __decorate([
 ], UsersController.prototype, "spinWheel", null);
 __decorate([
     (0, common_1.Get)('categories'),
+    (0, common_1.Header)('Cache-Control', 'public, max-age=300'),
     (0, swagger_1.ApiOperation)({ summary: 'Get all categories' }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),

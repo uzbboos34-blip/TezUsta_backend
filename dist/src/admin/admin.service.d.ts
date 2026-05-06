@@ -2,7 +2,7 @@ import { PrismaService } from '../prisma/prisma.service';
 export declare class AdminService {
     private readonly prisma;
     constructor(prisma: PrismaService);
-    getAllLogs(page?: number, limit?: number): Promise<{
+    getAllLogs(page?: number, limit?: number, q?: string): Promise<{
         data: {
             details: any;
             user: {
@@ -13,6 +13,7 @@ export declare class AdminService {
             job: {
                 id: number;
                 phone: string;
+                region: string | null;
                 isDeleted: boolean;
                 createdAt: Date;
                 updatedAt: Date;
@@ -44,7 +45,7 @@ export declare class AdminService {
         }[];
         total: number;
     }>;
-    getAllUsers(viewerRole: string, page?: number, limit?: number): Promise<{
+    getAllUsers(viewerRole: string, page?: number, limit?: number, q?: string, region?: string, district?: string): Promise<{
         data: {
             totalEarned: any;
             totalSpent: any;
@@ -92,7 +93,7 @@ export declare class AdminService {
         }[];
         total: number;
     }>;
-    getCategories(): Promise<any>;
+    getCategories(q?: string): Promise<any>;
     createCategory(data: {
         id?: string;
         name: string;
@@ -106,7 +107,7 @@ export declare class AdminService {
     }): Promise<any>;
     deleteCategory(id: string): Promise<any>;
     approveCategory(id: string): Promise<any>;
-    getAllJobs(page?: number, limit?: number): Promise<{
+    getAllJobs(page?: number, limit?: number, q?: string, region?: string, district?: string): Promise<{
         data: ({
             worker: {
                 phone: string;
@@ -115,10 +116,13 @@ export declare class AdminService {
             client: {
                 phone: string;
                 name: string | null;
+                region: string | null;
+                district: string | null;
             };
         } & {
             id: number;
             phone: string;
+            region: string | null;
             isDeleted: boolean;
             createdAt: Date;
             updatedAt: Date;
@@ -146,13 +150,13 @@ export declare class AdminService {
         data: any;
         total: any;
     }>;
-    getPaymentRequests(page?: number, limit?: number): Promise<{
+    getPaymentRequests(page?: number, limit?: number, q?: string): Promise<{
         data: any;
         total: any;
     }>;
     approvePayment(id: number): Promise<any>;
     rejectPayment(id: number): Promise<any>;
-    getAllTransactions(page?: number, limit?: number): Promise<{
+    getAllTransactions(page?: number, limit?: number, q?: string): Promise<{
         data: any;
         total: any;
     }>;

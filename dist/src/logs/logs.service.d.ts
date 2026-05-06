@@ -29,6 +29,7 @@ export declare class LogsService {
         job: {
             id: number;
             phone: string;
+            region: string | null;
             isDeleted: boolean;
             createdAt: Date;
             updatedAt: Date;

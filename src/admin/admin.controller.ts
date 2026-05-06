@@ -26,20 +26,31 @@ export class AdminController {
 
   @Get('logs')
   @ApiOperation({ summary: 'Get all action logs' })
-  getLogs(@Query('page') page: string) {
-    return this.adminService.getAllLogs(+page || 1);
+  getLogs(@Query('page') page: string, @Query('q') q?: string) {
+    return this.adminService.getAllLogs(+page || 1, 8, q);
   }
 
   @Get('users')
   @ApiOperation({ summary: 'Get all users' })
-  getUsers(@Req() req: any, @Query('page') page: string) {
-    return this.adminService.getAllUsers(req.user.role, +page || 1);
+  getUsers(
+    @Req() req: any,
+    @Query('page') page: string,
+    @Query('q') q?: string,
+    @Query('region') region?: string,
+    @Query('district') district?: string,
+  ) {
+    return this.adminService.getAllUsers(req.user.role, +page || 1, 8, q, region, district);
   }
 
   @Get('jobs')
   @ApiOperation({ summary: 'Get all jobs' })
-  getJobs(@Query('page') page: string) {
-    return this.adminService.getAllJobs(+page || 1);
+  getJobs(
+    @Query('page') page: string,
+    @Query('q') q?: string,
+    @Query('region') region?: string,
+    @Query('district') district?: string,
+  ) {
+    return this.adminService.getAllJobs(+page || 1, 8, q, region, district);
   }
 
   @Get('users/:id/jobs')
@@ -81,8 +92,8 @@ export class AdminController {
 
   @Get('payments')
   @ApiOperation({ summary: 'Get all payment requests' })
-  getPayments(@Query('page') page: string) {
-    return this.adminService.getPaymentRequests(+page || 1);
+  getPayments(@Query('page') page: string, @Query('q') q?: string) {
+    return this.adminService.getPaymentRequests(+page || 1, 8, q);
   }
 
   @Post('payments/:id/approve')
@@ -100,8 +111,8 @@ export class AdminController {
   @Roles('admin', 'superadmin', 'worker', 'client')
   @Get('categories')
   @ApiOperation({ summary: 'Get all categories' })
-  getCategories() {
-    return this.adminService.getCategories();
+  getCategories(@Query('q') q?: string) {
+    return this.adminService.getCategories(q);
   }
 
   @Post('categories')
@@ -132,8 +143,8 @@ export class AdminController {
 
   @Get('transactions')
   @ApiOperation({ summary: 'Get all transactions' })
-  getTransactions(@Query('page') page: string) {
-    return this.adminService.getAllTransactions(+page || 1);
+  getTransactions(@Query('page') page: string, @Query('q') q?: string) {
+    return this.adminService.getAllTransactions(+page || 1, 8, q);
   }
 
   @Roles('admin', 'superadmin', 'worker', 'client')

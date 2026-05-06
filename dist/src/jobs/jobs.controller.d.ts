@@ -9,17 +9,14 @@ export declare class JobsController {
             id: number;
         };
     }, createJobDto: CreateJobDto): Promise<{
-        id: number;
-        phone: string;
-        isDeleted: boolean;
-        createdAt: Date;
-        updatedAt: Date;
         title: string;
         cat: string;
         icon: string | null;
         price: number;
         addr: string;
+        phone: string;
         date: string;
+        region: string | null;
         dist: string | null;
         desc: string | null;
         status: string;
@@ -27,8 +24,12 @@ export declare class JobsController {
         clientReviews: number | null;
         lat: number | null;
         lng: number | null;
+        isDeleted: boolean;
+        createdAt: Date;
+        updatedAt: Date;
         dueDate: Date | null;
         requiredWorkers: number;
+        id: number;
         clientId: number;
         workerId: number | null;
     }>;
@@ -37,7 +38,7 @@ export declare class JobsController {
             id: number;
             role: string;
         };
-    }, filterCat?: string, mine?: string): Promise<any>;
+    }, filterCat?: string, mine?: string, q?: string, region?: string, district?: string): Promise<any>;
     findOne(req: {
         user: {
             id: number;
@@ -49,17 +50,14 @@ export declare class JobsController {
             id: number;
         };
     }, id: string, updateJobDto: UpdateJobDto): Promise<{
-        id: number;
-        phone: string;
-        isDeleted: boolean;
-        createdAt: Date;
-        updatedAt: Date;
         title: string;
         cat: string;
         icon: string | null;
         price: number;
         addr: string;
+        phone: string;
         date: string;
+        region: string | null;
         dist: string | null;
         desc: string | null;
         status: string;
@@ -67,8 +65,12 @@ export declare class JobsController {
         clientReviews: number | null;
         lat: number | null;
         lng: number | null;
+        isDeleted: boolean;
+        createdAt: Date;
+        updatedAt: Date;
         dueDate: Date | null;
         requiredWorkers: number;
+        id: number;
         clientId: number;
         workerId: number | null;
     }>;
@@ -77,17 +79,14 @@ export declare class JobsController {
             id: number;
         };
     }, id: string): Promise<{
-        id: number;
-        phone: string;
-        isDeleted: boolean;
-        createdAt: Date;
-        updatedAt: Date;
         title: string;
         cat: string;
         icon: string | null;
         price: number;
         addr: string;
+        phone: string;
         date: string;
+        region: string | null;
         dist: string | null;
         desc: string | null;
         status: string;
@@ -95,8 +94,12 @@ export declare class JobsController {
         clientReviews: number | null;
         lat: number | null;
         lng: number | null;
+        isDeleted: boolean;
+        createdAt: Date;
+        updatedAt: Date;
         dueDate: Date | null;
         requiredWorkers: number;
+        id: number;
         clientId: number;
         workerId: number | null;
     }>;
@@ -105,9 +108,9 @@ export declare class JobsController {
             id: number;
         };
     }, id: string): Promise<{
-        id: number;
-        createdAt: Date;
         status: string;
+        createdAt: Date;
+        id: number;
         workerId: number;
         jobId: number;
     }>;
@@ -121,17 +124,14 @@ export declare class JobsController {
             id: number;
         };
     }, id: string, finalPrice?: number): Promise<{
-        id: number;
-        phone: string;
-        isDeleted: boolean;
-        createdAt: Date;
-        updatedAt: Date;
         title: string;
         cat: string;
         icon: string | null;
         price: number;
         addr: string;
+        phone: string;
         date: string;
+        region: string | null;
         dist: string | null;
         desc: string | null;
         status: string;
@@ -139,8 +139,12 @@ export declare class JobsController {
         clientReviews: number | null;
         lat: number | null;
         lng: number | null;
+        isDeleted: boolean;
+        createdAt: Date;
+        updatedAt: Date;
         dueDate: Date | null;
         requiredWorkers: number;
+        id: number;
         clientId: number;
         workerId: number | null;
     }>;
@@ -149,17 +153,14 @@ export declare class JobsController {
             id: number;
         };
     }, id: string): Promise<{
-        id: number;
-        phone: string;
-        isDeleted: boolean;
-        createdAt: Date;
-        updatedAt: Date;
         title: string;
         cat: string;
         icon: string | null;
         price: number;
         addr: string;
+        phone: string;
         date: string;
+        region: string | null;
         dist: string | null;
         desc: string | null;
         status: string;
@@ -167,8 +168,12 @@ export declare class JobsController {
         clientReviews: number | null;
         lat: number | null;
         lng: number | null;
+        isDeleted: boolean;
+        createdAt: Date;
+        updatedAt: Date;
         dueDate: Date | null;
         requiredWorkers: number;
+        id: number;
         clientId: number;
         workerId: number | null;
     }>;

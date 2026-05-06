@@ -20,6 +20,7 @@ class CreateJobDto {
     addr;
     phone;
     date;
+    region;
     dist;
     desc;
     lat;
@@ -71,7 +72,13 @@ __decorate([
     __metadata("design:type", String)
 ], CreateJobDto.prototype, "date", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: '2.4 km', required: false }),
+    (0, swagger_1.ApiProperty)({ example: 'toshkent_shahar', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateJobDto.prototype, "region", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Chilonzor', required: false }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)

@@ -41,8 +41,17 @@ export class JobsController {
     @Request() req: { user: { id: number; role: string } },
     @Query('cat') filterCat?: string,
     @Query('mine') mine?: string,
+    @Query('q') q?: string,
+    @Query('region') region?: string,
+    @Query('district') district?: string,
   ) {
-    return this.jobsService.findAll(req.user.id, req.user.role, filterCat, mine === 'true');
+    return this.jobsService.findAll(req.user.id, req.user.role, {
+      cat: filterCat,
+      mine: mine === 'true',
+      q,
+      region,
+      district,
+    });
   }
 
   @Get(':id')

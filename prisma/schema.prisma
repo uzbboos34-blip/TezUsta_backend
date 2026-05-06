@@ -51,6 +51,7 @@ model Job {
   addr          String
   phone         String
   date          String
+  region        String?
   dist          String?
   desc          String?
   clientId      Int
